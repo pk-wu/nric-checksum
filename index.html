@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NRIC Checksum</title>
+  <!-- inside your <style> section -->
+<style>
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;  /* center horizontally */
+  gap: 15px;            /* spacing between container and button */
+}
+  body, html {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+  }
+
+  .container {
+    display: flex;
+    gap: 15px;
+    padding: 20px 30px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  select, input {
+    font-size: 16px;
+    padding: 8px;
+  }
+
+  #digitInput {
+    width: 120px;
+  }
+
+  #result {
+    width: 40px; /* Smaller width for single character */
+    text-align: center;
+  }
+
+  input[disabled] {
+    background-color: #eee;
+    color: #555;
+  }
+   #copyBtn {
+    margin-top: 15px;
+    padding: 8px 16px;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+
+  #copyBtn:hover {
+    background-color: #45a049;
+    
+    
+
+  }
+</style>
+</head>
+<body>
+
+  <div class="wrapper">
+    <div class="container">
+     
+
+    <!-- Dropdown Field -->
+    <select id="type">
+      <option value="S">S</option>
+      <option value="T">T</option>
+    </select>
+
+    <!-- Input Field for Digits -->
+    <input type="text" id="digitInput" maxlength="7" placeholder="7 digits" />
+
+    <!-- Disabled Result Field -->
+    <input type="text" id="result" disabled placeholder="-" />
+    </div>
+    
+    
+
+    <button id="copyBtn">Copy Full NRIC</button>
+  </div>
+  
+  <script>
+    const digitInput = document.getElementById("digitInput");
+    const typeSelect = document.getElementById("type");
+    const resultField = document.getElementById("result");
+
+    function calculateChecksum(prefix, digits) {
+      const weights = [2, 7, 6, 5, 4, 3, 2];
+      const ST = ["J", "Z", "I", "H", "G", "F", "E", "D", "C", "B", "A"];
+
+      let cumsum = 0;
+      for (let i = 0; i < 7; i++) {
+        cumsum += parseInt(digits[i], 10) * weights[i];
+      }
+
+      if (prefix.toUpperCase() === "T") {
+        cumsum += 4;
+      }
+
+      const rem = cumsum % 11;
+      return ST[rem];
+    }
+
+    function updateResult() {
+      const prefix = typeSelect.value;
+      const digits = digitInput.value;
+
+      if (/^\d{7}$/.test(digits)) {
+        resultField.value = calculateChecksum(prefix, digits);
+      } else {
+        resultField.value = "";
+      }
+    }
+
+    digitInput.addEventListener("input", function () {
+      this.value = this.value.replace(/\D/g, '').slice(0, 7);
+      updateResult();
+    });
+
+    typeSelect.addEventListener("change", updateResult);
+
+    window.addEventListener("DOMContentLoaded", updateResult);
+
+     const copyBtn = document.getElementById("copyBtn");
+
+  copyBtn.addEventListener("click", function () {
+    const prefix = typeSelect.value;
+    const digits = digitInput.value;
+    const checksum = resultField.value;
+
+    if (/^\d{7}$/.test(digits) && checksum) {
+      const fullNric = prefix + digits + checksum;
+      navigator.clipboard.writeText(fullNric).then(() => {
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => copyBtn.textContent = "Copy Full NRIC", 1500);
+      });
+    } else {
+      copyBtn.textContent = "Invalid input";
+      setTimeout(() => copyBtn.textContent = "Copy Full NRIC", 1500);
+    }
+  });
+  </script>
+
+</body>
+</html>
